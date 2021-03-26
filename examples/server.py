@@ -16,7 +16,7 @@ buffer_host, buffer_port = 'localhost', 8001
 args = sys.argv[1:]
 
 
-with ServerProxy(f'http://{buffer_host}:{buffer_port}') as buffer_rpc, \
+with ServerProxy('http://%s:%d' % (buffer_host, buffer_port)) as buffer_rpc, \
         SimpleXMLRPCServer((host, port)) as server, \
         FrameBufferClient(key=buffer_rpc.get_key()) as client:
 
@@ -27,7 +27,7 @@ with ServerProxy(f'http://{buffer_host}:{buffer_port}') as buffer_rpc, \
         return (offset, size, checksum)
 
     server.register_function(getData)
-    print(f'Serving XML-RPC on {host} port {port}', file=sys.stderr)
+    print('Serving XML-RPC on %s port %d' % (host, port), file=sys.stderr)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

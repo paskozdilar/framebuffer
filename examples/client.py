@@ -14,8 +14,8 @@ buffer_host, buffer_port = 'localhost', 8001
 args = sys.argv[1:]
 
 
-with ServerProxy(f'http://{buffer_host}:{buffer_port}') as buffer_rpc, \
-        ServerProxy(f'http://{host}:{port}') as server_rpc, \
+with ServerProxy('http://%s:%d' % (buffer_host, buffer_port)) as buffer_rpc, \
+        ServerProxy('http://%s:%d' % (host, port)) as server_rpc, \
         FrameBufferClient(key=buffer_rpc.get_key()) as client:
 
     def get_frame():
@@ -24,7 +24,7 @@ with ServerProxy(f'http://{buffer_host}:{buffer_port}') as buffer_rpc, \
             data = client.read(offset, size, checksum)
             return data
         except FrameBufferTimeout as exc:
-            print(f'{type(exc).__name__}: {exc}', file=sys.stderr)
+            print('%s: %s' % (type(exc).__name__, str(exc)), file=sys.stderr)
 
     try:
         print('starting...')
@@ -38,7 +38,7 @@ with ServerProxy(f'http://{buffer_host}:{buffer_port}') as buffer_rpc, \
                 total_size += len(frame)
             end_time = time.time()
             throughput = (total_size / (end_time - start_time)) / (2**20)
-            print(f'Throughput [MiB/s]: {throughput}', file=sys.stderr)
+            print('Throughput [MiB/s]: %f' % (throughput), file=sys.stderr)
 
     except KeyboardInterrupt:
         print('\nKeyboard interrupt received, exiting.', file=sys.stderr)

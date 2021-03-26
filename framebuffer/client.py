@@ -27,11 +27,11 @@ class FrameBufferClient:
         self.shared_memory = SharedMemory(key=self.key)
         self.buffer = memoryview(self.shared_memory)
         self.size = self.shared_memory.size
-        logging.info(f'Started FrameBufferClient - {self.key=}, {self.size=}')
+        logging.info('Started FrameBufferClient - %s, %d' % (self.key, self.size))
 
     def stop(self):
         self.shared_memory.detach()
-        logging.info(f'Stopped FrameBufferClient - {self.key=}, {self.size=}')
+        logging.info('Stopped FrameBufferClient - %s, %d' % (self.key, self.size))
 
     def write(self, offset: int, data: bytes) -> str:
         """ Returns `checksum` """

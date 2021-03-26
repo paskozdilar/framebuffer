@@ -18,10 +18,10 @@ with SimpleXMLRPCServer((host, port)) as server, FrameBufferServer(size) as fram
     server.register_function(framebuffer.get_key)
     server.register_function(framebuffer.allocate)
 
-    print(f'Serving XML-RPC FrameBufferServer on {host} port {port}', file=sys.stderr)
+    print('Serving XML-RPC FrameBufferServer on %s port %d' % (host, port), file=sys.stderr)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        print("\nKeyboard interrupt received, exiting.", file=sys.stderr)
+        print('\nKeyboard interrupt received, exiting.', file=sys.stderr)
         sys.exit(0)
 
