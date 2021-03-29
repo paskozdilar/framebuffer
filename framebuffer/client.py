@@ -1,10 +1,61 @@
 #!/usr/bin/env python3
+"""
+This module contains FrameBufferClient implementation of the framebuffer
+shared-memory IPC.
 
+Each FrameBufferClient is tied to its key, with which it is initialized.
+
+---
+
+Convenience function `read_frame` is implemented for the single-buffer case.
+
+If you're using multi-buffer reads, this implementation will be EXTREMELY
+inefficient because it closes and opens a new buffer every time `key` changes,
+so it would be smart to roll your own implementation.
+"""
+
+import atexit
 import base64
 import logging
 import pyhash
 import sys
 from sysv_ipc import SharedMemory
+
+
+global __default_buffer = None
+
+
+def read_frame(frame_info: dict) -> bytes:
+    """
+    Receives `frame_info` dict which must contain the following items:
+    {
+        "key": <str>,
+        "offset": <int>,
+        "size": <int>,
+        "checksum": <str>,
+    }
+
+    If read was successful, returns a bytes blob which contains the JPEG frame.
+    Otherwise, raises FrameBufferTimeout.
+    """
+    global __default_buffer
+
+    key = frame_info['key']
+    offset = frame_info['offset']
+    size = frame_info['size']
+    checksum = frame_info['checksum']
+
+    if __default_buffer is not None and __default_buffer.key != key:
+        __default_buffer.stop()
+        atexit.unregister(__default_buffer.stop)
+        __default_buffer = None
+
+    if __default_buffer is None:
+        __default_buffer = FrameBufferClient(key)
+        atexit.register(__default_buffer.stop)
+        __default_buffer.start()
+
+    return __default_buffer.read(offset, size, checksum)
 
 
 class FrameBufferClient:
