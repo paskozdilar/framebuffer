@@ -80,7 +80,7 @@ Writer:
 
 ```python3
 from random import getrandbits
-frim sys import byteorder
+from sys import byteorder
 
 from framebuffer.client import FrameBufferClient
 from __SOME_LIBRARY__ import RPC_CALL
