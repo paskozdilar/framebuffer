@@ -50,7 +50,6 @@ Module/class/method tree:
 ### Server side:
 
 ```python3
-import uuid
 from framebuffer.server import FrameBufferServer
 from __SOME_LIBRARY__ import RUN_SERVICE, RPC_METHOD
 
