@@ -22,7 +22,7 @@ import sys
 from sysv_ipc import SharedMemory
 
 
-global __default_buffer = None
+__default_buffer = None
 
 
 def read_frame(frame_info: dict) -> bytes:
