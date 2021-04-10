@@ -1,4 +1,4 @@
-# core-framebuffer
+# framebuffer
 
 Minimalistic SharedMemory-based framebuffer Python library for fast data
 transfer between processes/containers.
