@@ -1,41 +1,28 @@
-# core-framebuffer
+# framebuffer
 
 Minimalistic SharedMemory-based framebuffer Python library for fast data
 transfer between processes/containers.
 
+## Usage:
 
-## Concept:
+- instantiate `framebuffer.server.FrameBufferServer` with total segment `size`
+  capacity to create the shared memory segment
+- call `get_key()` on server to get client `key`
+- call `allocate(size)` on server with needed message `size` in bytes to get an
+  `offset` to read from/write to
+- instantiate `framebuffer.client.FrameBufferClient` (in the same or different
+  process) with client `key` to attach to the shared memory segment
+- call `write(offset, data)` with `offset` from the allocation call and `data`
+  (which must be at most `size` bytes) to write into the shared memory
+  segment, and get `checksum`
+- call `read(offset, size, checksum)` with previously mentioned `offset`,
+  `size`, and `checksum` to attempt to read from shared memory segment,
+  and to either get `data` or raise `FrameBufferTimeout`
 
-This concept assumes a single service that holds all the shared memory
-instances (and is properly configured to release the shared memory on exit,
-handle interrupt signals, etc):
 
-```
-                     /----------\                                              
-                    /    RING    \                                             
-                    \   BUFFER   /                                             
-                     \----------/                                              
-                           ^                                                   
-                           |                                                   
-                           |   (1: manage ring buffer and allocate chunks)
-                           |                                                   
-                 +--------------------+                                             
-                 | FRAMEBUFFER SERVER |                                
-                 +--------------------+                                
-                           ^
-                           |       (2: acquire ring buffer - r/w to all)
-                           |       (3: request allocation of size N - get offset as response)
-                           |
-    +-----------+    +-----------+
-    | Service_2 |    | Service_1 |
-    +-----------+    +-----------+
-          ^             |
-          |             |   (3: send message with offset, size and checksum as payload)
-          +-------------+
 
-    (4: recipient fetches data in the ring buffer and verifies the checksum)
-    [on invalid checksum, raises TimeoutError]
-```
+with the client `key`, and call `read(offset, size
+
 
 ## API:
 
@@ -47,11 +34,11 @@ Module/class/method tree:
         - FrameBufferClient(key: str)
             - start()  <==>  __enter__()
             - stop()   <==>  __exit__()
-            - write(offset: int, data: bytes) -> checksum: bytes
-            - read(offset: int, size: int, checksum: bytes) -> data: bytes
-                                                            -> raise FrameBufferTimeout
+            - write(offset: int, data: bytes) -> checksum: str
+            - read(offset: int, size: int, checksum: str) -> data: bytes
+                                                          -> raise FrameBufferTimeout
     - server
-        - FrameBufferServer(key, size)
+        - FrameBufferServer(size: int)
             - start()  <==>  __enter__()
             - stop()   <==>  __exit__()
             - get_key() -> key: str
@@ -63,14 +50,12 @@ Module/class/method tree:
 ### Server side:
 
 ```python3
-import uuid
 from framebuffer.server import FrameBufferServer
-from __SOME_LIBRARY__ import RPC_METHOD
+from __SOME_LIBRARY__ import RUN_SERVICE, RPC_METHOD
 
 
-key = str(uuid.uuid4())
 size = 500 * 2**20  # use 500MiB RAM
-server = FrameBufferServer(key, size)
+server = FrameBufferServer(size)
 
 with server:
     # example service code...
@@ -78,7 +63,7 @@ with server:
     @RPC_METHOD(service_name='framebuffer')
     def get_key():
         """ Get shared memory access key """
-        return key 
+        return server.get_key()
 
     @RPC_METHOD(service_name='framebuffer')
     def allocate(size):
@@ -86,7 +71,7 @@ with server:
         offset = server.allocate(size)
         return offset
 
-    service.run()
+    RUN_SERVICE()
 ```
 
 ### Client side:
@@ -95,7 +80,7 @@ Writer:
 
 ```python3
 from random import getrandbits
-frim sys import byteorder
+from sys import byteorder
 
 from framebuffer.client import FrameBufferClient
 from __SOME_LIBRARY__ import RPC_CALL
@@ -121,7 +106,7 @@ with FrameBufferClient(key) as client:
 Reader:
 
 ```python3
-from __SOME_LIBRARY__ import SERVICE, RPC_METHOD, RPC_CALL
+from __SOME_LIBRARY__ import RUN_SERVICE, RPC_METHOD
 from framebuffer.client import FrameBufferClient, FrameBufferTimeout
 
 key = RPC_CALL(service_name='framebuffer', 'get_key')
@@ -135,6 +120,8 @@ with FrameBufferClient(key) as client:
         except FrameBufferTimeout:
             ...
             # handle message timeout...
+
+    RUN_SERVICE()
 ```
 
 ---

@@ -1,1 +1,2 @@
-pyhash
+pyhash==0.9.3
+sysv_ipc==1.1.0
