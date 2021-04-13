@@ -20,10 +20,6 @@ transfer between processes/containers.
   and to either get `data` or raise `FrameBufferTimeout`
 
 
-
-with the client `key`, and call `read(offset, size
-
-
 ## API:
 
 Module/class/method tree:
@@ -34,6 +30,7 @@ Module/class/method tree:
         - FrameBufferClient(key: str)
             - start()  <==>  __enter__()
             - stop()   <==>  __exit__()
+            - set_key(key: str)
             - write(offset: int, data: bytes) -> checksum: str
             - read(offset: int, size: int, checksum: str) -> data: bytes
                                                           -> raise FrameBufferTimeout
