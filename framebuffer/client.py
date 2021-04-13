@@ -86,6 +86,10 @@ class FrameBufferClient:
         self.shared_memory.detach()
         logging.info('Stopped FrameBufferClient - %s, %d' % (self.key, self.size))
 
+    def set_key(self, key):
+        """ Set shared memory key (must be done before __enter__/start) """
+        self.key = key
+
     def write(self, offset: int, data: bytes) -> str:
         """ Returns `checksum` """
         bytes_to_back = min(len(data), self.size - offset)
