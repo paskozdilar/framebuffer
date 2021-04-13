@@ -75,12 +75,14 @@ class FrameBufferClient:
         self.stop()
 
     def start(self):
+        """ Start shared memory client """
         self.shared_memory = SharedMemory(key=self.key)
         self.buffer = memoryview(self.shared_memory)
         self.size = self.shared_memory.size
         logging.info('Started FrameBufferClient - %s, %d' % (self.key, self.size))
 
     def stop(self):
+        """ Stop shared memory client """
         self.shared_memory.detach()
         logging.info('Stopped FrameBufferClient - %s, %d' % (self.key, self.size))
 
