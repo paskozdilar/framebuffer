@@ -17,7 +17,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/paskozdilar/framebuffer",
-    packages=setuptools.find_packages(exclude=['examples']),
+    packages=setuptools.find_packages(exclude=['examples', 'tests']),
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
