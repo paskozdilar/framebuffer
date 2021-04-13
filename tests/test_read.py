@@ -59,11 +59,13 @@ def test_timeout():
             assert data == read_data
 
         # Add another write and assert first_frame_info doesn't work anymore
-        first_frame_info = frame_infos[0]
-
         data = _random_bytes(size)
         offset = server.allocate(size)
         client.write(offset, data)
+
+        offset = frame_infos[0]['offset']
+        size = frame_infos[0]['size']
+        checksum = frame_infos[0]['checksum']
 
         with pytest.raises(FrameBufferTimeout):
             read_data = client.read(offset=offset, size=size, checksum=checksum)
