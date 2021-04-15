@@ -4,6 +4,9 @@ import logging
 from sysv_ipc import SharedMemory, IPC_CREX
 
 
+logger = logging.getLogger(__name__)
+
+
 class FrameBufferServer:
 
     def __init__(self, size: int):
@@ -25,13 +28,13 @@ class FrameBufferServer:
         self.shared_memory = SharedMemory(key=None, flags=IPC_CREX, size=self.size)
         self.buffer = memoryview(self.shared_memory)
         self.key = self.shared_memory.key
-        logging.info('Started FrameBufferServer - %s, %d' % (self.key, self.size))
+        logger.info('Started FrameBufferServer - %s, %d' % (self.key, self.size))
 
     def stop(self):
         """ Stop shared memory server """
         self.shared_memory.detach()
         self.shared_memory.remove()
-        logging.info('Stopped FrameBufferServer - %s, %d' % (self.key, self.size))
+        logger.info('Stopped FrameBufferServer - %s, %d' % (self.key, self.size))
 
     def get_key(self) -> str:
         """ Return client key for shared memory access """

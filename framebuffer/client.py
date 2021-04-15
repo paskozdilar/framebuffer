@@ -25,6 +25,9 @@ from sysv_ipc import SharedMemory
 __default_buffer = None
 
 
+logger = logging.getLogger(__name__)
+
+
 def read_frame(frame_info: dict) -> bytes:
     """
     Receives `frame_info` dict which must contain the following items:
@@ -79,12 +82,14 @@ class FrameBufferClient:
         self.shared_memory = SharedMemory(key=self.key)
         self.buffer = memoryview(self.shared_memory)
         self.size = self.shared_memory.size
-        logging.info('Started FrameBufferClient - %s, %d' % (self.key, self.size))
+        logger.info('Started FrameBufferClient - key=%s, size=%d' \
+                    % (self.key, self.size))
 
     def stop(self):
         """ Stop shared memory client """
         self.shared_memory.detach()
-        logging.info('Stopped FrameBufferClient - %s, %d' % (self.key, self.size))
+        logger.info('Stopped FrameBufferClient - key=%s, key=%d' \
+                    % (self.key, self.size))
 
     def set_key(self, key):
         """ Set shared memory key (must be done before __enter__/start) """
