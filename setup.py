@@ -10,7 +10,7 @@ with open('requirements.txt') as requirements:
 
 setuptools.setup(
     name="framebuffer",
-    version="1.1.0",
+    version="1.1.1",
     author="Pasko Zdilar",
     author_email="paskozdilar@gmail.com",
     description="SharedMemory-based frame buffer client/server library",
