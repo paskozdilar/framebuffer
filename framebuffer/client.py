@@ -88,7 +88,7 @@ class FrameBufferClient:
     def stop(self):
         """ Stop shared memory client """
         self.shared_memory.detach()
-        logger.info('Stopped FrameBufferClient - key=%s, key=%d' \
+        logger.info('Stopped FrameBufferClient - key=%s, size=%d' \
                     % (self.key, self.size))
 
     def set_key(self, key):
@@ -102,7 +102,9 @@ class FrameBufferClient:
         self.buffer[offset : offset + bytes_to_back] = data[0:bytes_to_back]
         if bytes_to_front > 0:
             self.buffer[0 : bytes_to_front] = data[bytes_to_back:]
-        _hash = base64.b64encode(self._hasher(data).to_bytes(8, sys.byteorder)).decode()
+        _hash = base64.b64encode(
+            self._hasher(data).to_bytes(8, sys.byteorder)
+        ).decode()
         return _hash
 
     def read(self, offset: int, size: int, checksum: str) -> bytes:
@@ -112,7 +114,9 @@ class FrameBufferClient:
         data = bytes(self.buffer[offset:offset+bytes_from_back])
         if bytes_from_front > 0:
             data += bytes(self.buffer[0:bytes_from_front])
-        _hash = base64.b64encode(self._hasher(data).to_bytes(8, sys.byteorder)).decode()
+        _hash = base64.b64encode(
+            self._hasher(data).to_bytes(8, sys.byteorder)
+        ).decode()
         if _hash != checksum:
             raise FrameBufferTimeout("Invalid checksum - buffer already reused")
         return data
